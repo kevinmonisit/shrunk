@@ -134,7 +134,33 @@ export class CreateLinkForm extends React.Component<Props, State> {
   };
 
   setSuggestionModalOpen = async (): Promise<void> => {
+    function parseURL(input_url:string):string{
+      let toRemoveURLTokens:string[] = ["www", "https://", "http://","src="," edu "," com ","html"];
+      let toSpaceURLTokens:string[] = [".", "?", "/", "-", "_", "="];
+      toRemoveURLTokens.forEach(token=>{
+        input_url = input_url.split(token).join("");
+      })
+      toSpaceURLTokens.forEach(token=>{
+        input_url = input_url.split(token).join(" ");
+      })
+      input_url = input_url.trim();
+      return input_url;
+    }
+
+    
+    let input_url:string = this.formRef.current?.getFieldValue("long_url")
+    console.log(input_url);
+    if(input_url){
+      let parsedURLString:string = parseURL(input_url);
+      console.log(parsedURLString);
+      // const createAliasResp = await fetch('', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        // });
+    }
+
     this.setState({ isSuggestionModalOpen: true });
+
   };
 
   toggleLoading = () => {
