@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import base32 from 'hi-base32';
 import moment from 'moment';
 import { Form, Input, Button, DatePicker, Space, Tooltip, Spin, Modal } from 'antd/lib';
@@ -110,6 +110,7 @@ export interface Props {
  */
 interface State {
   loading: boolean;
+  isSuggestionModalOpen: boolean;
 }
 
 /**
@@ -123,8 +124,18 @@ export class CreateLinkForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       loading: false,
+      isSuggestionModalOpen: false,
     };
   }
+
+  //the hook for the Suggestion modal
+  setSuggestionModalClosed = () => {
+    this.setState({ isSuggestionModalOpen: false });
+  };
+
+  setSuggestionModalOpen = async (): Promise<void> => {
+    this.setState({ isSuggestionModalOpen: true });
+  };
 
   toggleLoading = () => {
     this.setState({ loading: true });
@@ -146,7 +157,7 @@ export class CreateLinkForm extends React.Component<Props, State> {
    */
   createLink = async (values: CreateLinkFormValues): Promise<void> => {
     this.toggleLoading();
-
+    this.setSuggestionModalClosed();
     const createLinkReq: Record<string, string> = {
       title: values.title,
       long_url: values.long_url,
@@ -208,134 +219,171 @@ export class CreateLinkForm extends React.Component<Props, State> {
       this.props.userPrivileges.has('power_user') ||
       this.props.userPrivileges.has('admin');
     return (
-      <div className="dropdown-form">
-        <Form
-          ref={this.formRef}
-          layout="vertical"
-          initialValues={initialValues}
-          onFinish={this.createLink}
-        >
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: 'Please input a title.' }]}
-          >
-            <Input placeholder="Title" />
-          </Form.Item>
-
-          <Form.Item
-            label="Long URL"
-            name="long_url"
-            rules={[
-              { required: true, message: 'Please input a URL.' },
-              { type: 'url', message: 'Please enter a valid URL.' },
-              { validator: serverValidateLongUrl },
-            ]}
-          >
-            <Input placeholder="Long URL" prefix={<LinkOutlined />} />
-          </Form.Item>
-
-          <Form.Item label="Expiration time" name="expiration_time">
-            <DatePicker
-              format="YYYY-MM-DD HH:mm:ss"
-              disabledDate={(current) =>
-                current && current < moment().startOf('day')
-              }
-              showTime={{ defaultValue: moment() }}
-            />
-          </Form.Item>
-
-          <Form.List name="aliases">
-            {(fields, { add, remove }) => (
-              <div className="fix-alias-remove-button">
-                {fields.map((field, index) => (
-                  <Space
-                    key={field.key}
-                    style={{ display: 'flex', marginBottom: 8 }}
-                    align="start"
-                  >
-                    {!mayUseCustomAliases ? (
-                      <></>
-                    ) : (
-                      <Form.Item
-                        label={index === 0 ? <CustomAliasLabel /> : ''}
-                        name={[field.name, 'alias']}
-                        fieldKey={field.fieldKey}
-                        rules={[
-                          {
-                            min: 5,
-                            message:
-                              'Aliases may be no shorter than 5 characters.',
-                          },
-                          {
-                            max: 60,
-                            message:
-                              'Aliases may be no longer than 60 characters.',
-                          },
-                          {
-                            pattern: /^[a-zA-Z0-9_.,-]*$/,
-                            message:
-                              'Aliases may consist only of numbers, letters, and the punctuation marks “.,-_”.',
-                          },
-                          { validator: serverValidateReservedAlias },
-                          { validator: serverValidateDuplicateAlias },
-                        ]}
-                      >
-                        <Input placeholder="alias" />
-                      </Form.Item>
-                    )}
-
-                    <Form.Item
-                      label={
-                        index === 0 ? (
-                          !mayUseCustomAliases ? (
-                            <AliasLabel />
-                          ) : (
-                            'Description'
-                          )
-                        ) : (
-                          ''
-                        )
-                      }
-                      name={[field.name, 'description']}
-                      fieldKey={field.fieldKey}
-                    >
-                      <Input placeholder="Description" />
-                    </Form.Item>
-
-                    <Button
-                      disabled={fields.length === 1}
-                      type="text"
-                      icon={<MinusCircleOutlined />}
-                      onClick={() => remove(field.name)}
-                    />
-                  </Space>
-                ))}
-                {fields.length >= 6 ? (
-                  <></>
-                ) : (
-                  <Form.Item>
-                    <Button block type="dashed" onClick={add}>
-                      <PlusOutlined /> Add another alias
-                    </Button>
-                  </Form.Item>
-                )}
-              </div>
-            )}
-          </Form.List>
-
-          <Form.Item>
-            <Spin spinning={this.state.loading}>
+      <div>
+        <div>
+          <Modal title="Alias Suggestions" visible={this.state.isSuggestionModalOpen} onOk={this.setSuggestionModalClosed} onCancel={this.setSuggestionModalClosed} style={{ right: 200, top: 200 }}>
+            <div>
+              <h2>go.rutgers.edu/BastionBetterThanDVA</h2>
               <Button
                 type="primary"
-                htmlType="submit"
-                style={{ width: '100%' }}
+                style={{ width: '30%' }}
               >
-                Shrink!
+                Use this Alias
               </Button>
-            </Spin>
-          </Form.Item>
-        </Form>
+            </div >
+            <div>
+              <h2>go.rutgers.edu/RU-History</h2>
+              <Button
+                type="primary"
+                style={{ width: '30%' }}
+              >
+                Use this Alias
+              </Button>
+            </div >
+            <div>
+              <h2>go.rutgers.edu/History</h2>
+              <Button
+                type="primary"
+                style={{ width: '30%' }}
+              >
+                Use this Alias
+              </Button>
+            </div >
+          </Modal>
+        </div>
+        <div className="dropdown-form">
+          <Form
+            ref={this.formRef}
+            layout="vertical"
+            initialValues={initialValues}
+            onFinish={this.createLink}
+          >
+            <Form.Item
+              label="Title"
+              name="title"
+              rules={[{ required: true, message: 'Please input a title.' }]}
+            >
+              <Input placeholder="Title" />
+            </Form.Item>
+
+            <Form.Item
+              label="Long URL"
+              name="long_url"
+              rules={[
+                { required: true, message: 'Please input a URL.' },
+                { type: 'url', message: 'Please enter a valid URL.' },
+                { validator: serverValidateLongUrl },
+              ]}
+            >
+              <Input placeholder="Long URL" prefix={<LinkOutlined />} />
+            </Form.Item>
+
+            <Form.Item label="Expiration time" name="expiration_time">
+              <DatePicker
+                format="YYYY-MM-DD HH:mm:ss"
+                disabledDate={(current) =>
+                  current && current < moment().startOf('day')
+                }
+                showTime={{ defaultValue: moment() }}
+              />
+            </Form.Item>
+
+            <Form.List name="aliases">
+              {(fields, { add, remove }) => (
+                <div className="fix-alias-remove-button">
+                  {fields.map((field, index) => (
+                    <Space
+                      key={field.key}
+                      style={{ display: 'flex', marginBottom: 8 }}
+                      align="start"
+                    >
+                      {!mayUseCustomAliases ? (
+                        <></>
+                      ) : (
+                        <Form.Item
+                          label={index === 0 ? <CustomAliasLabel /> : ''}
+                          name={[field.name, 'alias']}
+                          fieldKey={field.fieldKey}
+                          rules={[
+                            {
+                              min: 5,
+                              message:
+                                'Aliases may be no shorter than 5 characters.',
+                            },
+                            {
+                              max: 60,
+                              message:
+                                'Aliases may be no longer than 60 characters.',
+                            },
+                            {
+                              pattern: /^[a-zA-Z0-9_.,-]*$/,
+                              message:
+                                'Aliases may consist only of numbers, letters, and the punctuation marks “.,-_”.',
+                            },
+                            { validator: serverValidateReservedAlias },
+                            { validator: serverValidateDuplicateAlias },
+                          ]}
+                        >
+                          <Input placeholder="alias" />
+                        </Form.Item>
+                      )}
+
+                      <Form.Item
+                        label={
+                          index === 0 ? (
+                            !mayUseCustomAliases ? (
+                              <AliasLabel />
+                            ) : (
+                              'Description'
+                            )
+                          ) : (
+                            ''
+                          )
+                        }
+                        name={[field.name, 'description']}
+                        fieldKey={field.fieldKey}
+                      >
+                        <Input placeholder="Description" />
+                      </Form.Item>
+
+                      <Button
+                        disabled={fields.length === 1}
+                        type="text"
+                        icon={<MinusCircleOutlined />}
+                        onClick={() => remove(field.name)}
+                      />
+                    </Space>
+                  ))}
+                  {fields.length >= 6 ? (
+                    <></>
+                  ) : (
+                    <Form.Item>
+                      <Button block type="dashed" onClick={add}>
+                        <PlusOutlined /> Add another alias
+                      </Button>
+                    </Form.Item>
+                  )}
+                </div>
+              )}
+            </Form.List>
+            <Form.Item>
+              <Button block type="dashed" onClick={this.setSuggestionModalOpen} >
+                Show Me Custom Alias Suggestions
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Spin spinning={this.state.loading}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ width: '100%' }}
+                >
+                  Shrink!
+                </Button>
+              </Spin>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
     );
   }
