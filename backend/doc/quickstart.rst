@@ -1,5 +1,5 @@
-Shrunk Quickstart
-=================
+Quickstart
+==========
 
 1. Clone the repository:
    ``git clone git@gitlab.rutgers.edu:MaCS/OSS/shrunk.git``
