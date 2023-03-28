@@ -11,6 +11,9 @@ Shrunk is a production of Rutgers `Open System Solutions <http://oss.rutgers.edu
 
 To get started with Shrunk development, have a look at the pages below.
 
+- :doc:`quickstart`
+    A quickstart guide to building shrunk.
+
 - :doc:`installation`
     How to install shrunk on a machine.
 
@@ -40,6 +43,7 @@ Phacility <https://em-oss-phab.phacility.com/diffusion/SRU/>`_.
    :maxdepth: 1
    :hidden:
 
+   quickstart
    installation
    backend_tutorial
    frontend_tutorial
