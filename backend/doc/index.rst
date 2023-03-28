@@ -43,6 +43,7 @@ Phacility <https://em-oss-phab.phacility.com/diffusion/SRU/>`_.
    :maxdepth: 1
    :hidden:
 
+   quickstart
    installation
    backend_tutorial
    frontend_tutorial
