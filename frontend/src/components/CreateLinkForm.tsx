@@ -111,9 +111,9 @@ export interface Props {
 interface State {
   loading: boolean;
   isSuggestionModalOpen: boolean;
-  suggestion1:string | null;
-  suggestion2:string | null;
-  suggestion3:string | null;
+  suggestion1: string | null;
+  suggestion2: string | null;
+  suggestion3: string | null;
 
 }
 
@@ -129,63 +129,59 @@ export class CreateLinkForm extends React.Component<Props, State> {
     this.state = {
       loading: false,
       isSuggestionModalOpen: false,
-      suggestion1:null,
-      suggestion2:null,
-      suggestion3:null
+      suggestion1: null,
+      suggestion2: null,
+      suggestion3: null
     };
   }
 
   //the hook for the Suggestion modal
   setSuggestionModalClosed = () => {
     this.setState({ isSuggestionModalOpen: false });
-    this.setState({suggestion1:null, suggestion2:null, suggestion3:null})
+    this.setState({ suggestion1: null, suggestion2: null, suggestion3: null })
   };
 
   setSuggestionModalOpen = async (): Promise<void> => {
-    function parseURL(input_url:string):string{
-      let toRemoveURLTokens:string[] = ["www", "https://", "http://","src="," edu "," com ","html"];
-      let toSpaceURLTokens:string[] = [".", "?", "/", "-", "_", "="];
-      toRemoveURLTokens.forEach(token=>{
+    function parseURL(input_url: string): string {
+      let toRemoveURLTokens: string[] = ["www", "https://", "http://", "src=", " edu ", " com ", "html"];
+      let toSpaceURLTokens: string[] = [".", "?", "/", "-", "_", "="];
+      toRemoveURLTokens.forEach(token => {
         input_url = input_url.split(token).join("");
       })
-      toSpaceURLTokens.forEach(token=>{
+      toSpaceURLTokens.forEach(token => {
         input_url = input_url.split(token).join(" ");
       })
       input_url = input_url.trim();
       return input_url;
     }
 
-    let input_url:string = this.formRef.current?.getFieldValue("long_url")
+    let input_url: string = this.formRef.current?.getFieldValue("long_url")
     console.log(input_url);
-    if(input_url){
+    if (input_url) {
       this.setState({ isSuggestionModalOpen: true });
 
-      let parsedURLString:string = parseURL(input_url);
+      let parsedURLString: string = parseURL(input_url);
+      this.setState({ suggestion2: parsedURLString.split(" ").join("") });
       console.log(parsedURLString);
       fetch(`http://127.0.0.1:8080/${parsedURLString}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        }).then(res=>res.json()).then((data)=>{
-          this.setState({suggestion1: data.decoded});
-          console.log(this.state.suggestion1);
-        }
-      );
-      fetch(`http://127.0.0.1:8080/${parsedURLString}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        }).then(res=>res.json()).then((data)=>{
-          this.setState({suggestion2: data.decoded});
-        }
-      );
-      fetch(`http://127.0.0.1:8080/${parsedURLString}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        }).then(res=>res.json()).then((data)=>{
-          this.setState({suggestion3: data.decoded});
-        }
-      );
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }).then(res => res.json()).then((data) => {
         
-    }else{
+        // get rid of the [start] in the beginning
+        this.setState({ suggestion1: data.decoded.split(" ").join("").replace("[start]","") });
+        console.log(data.decoded.split(" ").join("").replace);
+      }
+      );
+      fetch(`http://127.0.0.1:8080/${parsedURLString}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }).then(res => res.json()).then((data) => {
+        this.setState({ suggestion3: data.decoded.split(" ").join("-").replace("[start]","")});
+      }
+      );
+
+    } else {
       alert("Please enter a valid url");
       return;
     }
@@ -277,48 +273,48 @@ export class CreateLinkForm extends React.Component<Props, State> {
         <div>
           <Modal title="Alias Suggestions" visible={this.state.isSuggestionModalOpen} onOk={this.setSuggestionModalClosed} onCancel={this.setSuggestionModalClosed} style={{ right: 200, top: 200 }}>
             <div>
-              {this.state.suggestion1==null?
-              "Loading..."
-              :
-              <>
-                <h2>go.rutgers.edu/{this.state.suggestion1}</h2>
-                <Button
-                  type="primary"
-                  style={{ width: '30%' }}
-                >
-                  Use this Alias
-                </Button>
-              </>
+              {this.state.suggestion1 == null ?
+                "Loading..."
+                :
+                <>
+                  <h2>go.rutgers.edu/{this.state.suggestion1}</h2>
+                  <Button
+                    type="primary"
+                    style={{ width: '30%' }}
+                  >
+                    Use this Alias
+                  </Button>
+                </>
               }
             </div >
             <div>
-              {this.state.suggestion2==null?
-              "Loading..."
-              :
-              <>
-                <h2>go.rutgers.edu/{this.state.suggestion2}</h2>
-                <Button
-                  type="primary"
-                  style={{ width: '30%' }}
-                >
-                  Use this Alias
-                </Button>
-              </>
+              {this.state.suggestion2 == null ?
+                "Loading..."
+                :
+                <>
+                  <h2>go.rutgers.edu/{this.state.suggestion2}</h2>
+                  <Button
+                    type="primary"
+                    style={{ width: '30%' }}
+                  >
+                    Use this Alias
+                  </Button>
+                </>
               }
             </div >
             <div>
-              {this.state.suggestion3==null?
-              "Loading..."
-              :
-              <>
-                <h2>go.rutgers.edu/{this.state.suggestion3}</h2>
-                <Button
-                  type="primary"
-                  style={{ width: '30%' }}
-                >
-                  Use this Alias
-                </Button>
-              </>
+              {this.state.suggestion3 == null ?
+                "Loading..."
+                :
+                <>
+                  <h2>go.rutgers.edu/{this.state.suggestion3}</h2>
+                  <Button
+                    type="primary"
+                    style={{ width: '30%' }}
+                  >
+                    Use this Alias
+                  </Button>
+                </>
               }
             </div >
           </Modal>
